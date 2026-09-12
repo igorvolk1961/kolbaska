@@ -138,6 +138,43 @@ def test_levels_endpoint(client):
     assert levels[0]["name"] == "В начале славного пути"
 
 
+def test_client_can_save_delivery_coordinates(client, tokens):
+    headers = auth(tokens["client"])
+    response = client.patch(
+        "/api/auth/me",
+        json={"latitude": 55.751244, "longitude": 37.618423},
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    profile = response.json()["profile"]
+    assert profile["latitude"] == 55.751244
+    assert profile["longitude"] == 37.618423
+
+    me = client.get("/api/auth/me", headers=headers).json()
+    assert me["profile"]["latitude"] == 55.751244
+    assert me["profile"]["longitude"] == 37.618423
+
+
+def test_schema_migration_adds_coordinate_columns(tmp_path):
+    from sqlalchemy import create_engine, text
+
+    from app.database import ensure_schema
+
+    legacy = create_engine(f"sqlite:///{tmp_path / 'legacy.db'}")
+    with legacy.begin() as connection:
+        connection.execute(
+            text(
+                "CREATE TABLE client_profiles ("
+                "id INTEGER PRIMARY KEY, user_id INTEGER, points INTEGER, "
+                "currency_pref VARCHAR, phone VARCHAR, address VARCHAR, level_id INTEGER)"
+            )
+        )
+    ensure_schema(legacy)
+    with legacy.begin() as connection:
+        columns = {row[1] for row in connection.execute(text("PRAGMA table_info(client_profiles)"))}
+    assert {"latitude", "longitude"} <= columns
+
+
 def test_checkout_flow_and_points(client, tokens):
     headers = auth(tokens["client"])
     products = client.get("/api/catalog/products").json()

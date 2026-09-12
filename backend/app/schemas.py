@@ -45,6 +45,8 @@ class ClientProfileOut(ORMModel):
     currency_pref: str
     phone: str
     address: str
+    latitude: float | None = None
+    longitude: float | None = None
     level_id: int | None = None
 
 
@@ -70,6 +72,8 @@ class ProfileUpdate(BaseModel):
     phone: str | None = None
     address: str | None = None
     currency_pref: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 # --- catalog ---

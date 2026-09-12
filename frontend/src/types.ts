@@ -24,6 +24,8 @@ export interface Profile {
   currency_pref: string;
   phone: string;
   address: string;
+  latitude: number | null;
+  longitude: number | null;
   level_id: number | null;
 }
 

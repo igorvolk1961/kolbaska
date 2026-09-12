@@ -105,6 +105,10 @@ def update_me(
             profile.address = data.address
         if data.currency_pref is not None:
             profile.currency_pref = data.currency_pref
+        if data.latitude is not None:
+            profile.latitude = data.latitude
+        if data.longitude is not None:
+            profile.longitude = data.longitude
     db.commit()
     db.refresh(user)
     return _me(db, user)

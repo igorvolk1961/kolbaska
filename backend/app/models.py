@@ -81,6 +81,8 @@ class ClientProfile(Base):
     currency_pref: Mapped[str] = mapped_column(String(8), default="RUB")
     phone: Mapped[str] = mapped_column(String(64), default="")
     address: Mapped[str] = mapped_column(String(512), default="")
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     user: Mapped[User] = relationship(back_populates="profile")
     level: Mapped[LoyaltyLevel | None] = relationship()

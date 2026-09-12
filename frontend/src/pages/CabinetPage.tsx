@@ -4,6 +4,7 @@ import { authApi, ordersApi } from "../api";
 import { apiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { useCurrency } from "../settings/CurrencyContext";
+import DeliveryMap from "../components/DeliveryMap";
 import type { Order } from "../types";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -24,6 +25,8 @@ export default function CabinetPage() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [fullName, setFullName] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -38,6 +41,8 @@ export default function CabinetPage() {
       setPhone(me.profile?.phone ?? "");
       setAddress(me.profile?.address ?? "");
       setFullName(me.user.full_name);
+      setLatitude(me.profile?.latitude ?? null);
+      setLongitude(me.profile?.longitude ?? null);
     }
   }, [me]);
 
@@ -53,7 +58,16 @@ export default function CabinetPage() {
 
   async function saveProfile() {
     try {
-      await authApi.updateMe({ full_name: fullName, phone, address });
+      const payload: Parameters<typeof authApi.updateMe>[0] = {
+        full_name: fullName,
+        phone,
+        address,
+      };
+      if (latitude !== null && longitude !== null) {
+        payload.latitude = latitude;
+        payload.longitude = longitude;
+      }
+      await authApi.updateMe(payload);
       await refresh();
       setMessage("Профиль сохранён");
     } catch (error) {
@@ -110,6 +124,59 @@ export default function CabinetPage() {
               </button>
               {message && <p className="text-xs text-meat-600">{message}</p>}
             </div>
+          </div>
+
+          <div className="card p-6">
+            <h2 className="font-display text-lg font-bold text-meat-900">Место доставки</h2>
+            <p className="mt-1 text-xs text-meat-500">
+              Отметьте точку на карте OpenStreetMap — она сохранится в профиле и будет использована при
+              оформлении доставки.
+            </p>
+            <div className="mt-3">
+              <DeliveryMap
+                latitude={latitude}
+                longitude={longitude}
+                onChange={(lat, lng) => {
+                  setLatitude(lat);
+                  setLongitude(lng);
+                }}
+              />
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <div>
+                <label className="label" htmlFor="cab-lat">
+                  Широта
+                </label>
+                <input
+                  id="cab-lat"
+                  type="number"
+                  step="any"
+                  className="input"
+                  value={latitude ?? ""}
+                  onChange={(event) =>
+                    setLatitude(event.target.value === "" ? null : Number(event.target.value))
+                  }
+                />
+              </div>
+              <div>
+                <label className="label" htmlFor="cab-lon">
+                  Долгота
+                </label>
+                <input
+                  id="cab-lon"
+                  type="number"
+                  step="any"
+                  className="input"
+                  value={longitude ?? ""}
+                  onChange={(event) =>
+                    setLongitude(event.target.value === "" ? null : Number(event.target.value))
+                  }
+                />
+              </div>
+            </div>
+            <button type="button" className="btn-primary mt-3 w-full" onClick={saveProfile}>
+              Сохранить место доставки
+            </button>
           </div>
         </section>
 

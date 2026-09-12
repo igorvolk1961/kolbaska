@@ -27,7 +27,7 @@ export const authApi = {
       payload,
     ),
   me: () => api.get<Me>("/api/auth/me"),
-  updateMe: (payload: Partial<{ full_name: string; phone: string; address: string; currency_pref: string }>) =>
+  updateMe: (payload: Partial<{ full_name: string; phone: string; address: string; currency_pref: string; latitude: number; longitude: number }>) =>
     api.patch<Me>("/api/auth/me", payload),
   levels: () => api.get("/api/auth/levels"),
 };
