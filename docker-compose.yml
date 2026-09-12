@@ -1,0 +1,21 @@
+services:
+  kolbaska:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    image: kolbaska:latest
+    container_name: kolbaska
+    ports:
+      - "5010:8000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-10080}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5010}
+      DATABASE_URL: sqlite:////data/kolbaska.db
+    volumes:
+      - kolbaska-data:/data
+    restart: unless-stopped
+
+volumes:
+  kolbaska-data:

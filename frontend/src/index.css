@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream text-ink font-body antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-meat-700 text-white hover:bg-meat-600 shadow-card;
+  }
+  .btn-gold {
+    @apply btn bg-gold-400 text-meat-950 hover:bg-gold-300 shadow-card;
+  }
+  .btn-ghost {
+    @apply btn border border-meat-200 bg-white/70 text-meat-800 hover:bg-white;
+  }
+  .card {
+    @apply rounded-3xl border border-meat-100 bg-white/90 shadow-card backdrop-blur;
+  }
+  .input {
+    @apply w-full rounded-xl border border-meat-200 bg-white px-4 py-2.5 text-sm text-ink outline-none transition focus:border-meat-400 focus:ring-2 focus:ring-meat-100;
+  }
+  .label {
+    @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-meat-700;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-meat-50 px-3 py-1 text-xs font-semibold text-meat-700;
+  }
+  .section-title {
+    @apply font-display text-3xl font-bold text-meat-900 sm:text-4xl;
+  }
+}
+
+.hero-canvas {
+  background-image: radial-gradient(circle at 20% 20%, rgba(242, 193, 78, 0.28), transparent 45%),
+    radial-gradient(circle at 80% 30%, rgba(207, 79, 63, 0.35), transparent 50%),
+    linear-gradient(140deg, #3b0d0c 0%, #5f211d 45%, #7c2822 100%);
+}
+
+.tooltip-bubble {
+  @apply pointer-events-none absolute z-40 w-72 rounded-2xl bg-ink/95 p-3 text-xs leading-relaxed text-cream opacity-0 shadow-xl transition group-hover:opacity-100;
+}
