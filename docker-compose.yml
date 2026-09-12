@@ -13,8 +13,10 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-10080}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5010}
       DATABASE_URL: sqlite:////data/kolbaska.db
+      IMAGES_DIR: /images/products
     volumes:
       - kolbaska-data:/data
+      - ./images:/images:ro
     restart: unless-stopped
 
 volumes:

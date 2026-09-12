@@ -1,6 +1,9 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -10,6 +13,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60 * 24 * 7
     database_url: str = "sqlite:///./kolbaska.db"
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    images_dir: str = str(_REPO_ROOT / "images" / "products")
+    backgrounds_dir: str = str(_REPO_ROOT / "images" / "backgrounds")
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

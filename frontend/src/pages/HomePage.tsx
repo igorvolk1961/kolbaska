@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
-import { authApi, promosApi } from "../api";
+import { authApi, catalogApi, promosApi } from "../api";
 import { useAuth } from "../auth/AuthContext";
 import type { Level, Promo } from "../types";
 
@@ -10,10 +10,14 @@ const PAINTING_GRADIENTS = [
   "linear-gradient(135deg, rgba(25,10,14,0.85), rgba(80,25,40,0.7)), radial-gradient(circle at 60% 60%, rgba(244,162,97,0.35), transparent 55%), linear-gradient(160deg, #26101a, #5c2338 55%, #170a12)",
 ];
 
+const BACKGROUND_OVERLAY =
+  "linear-gradient(135deg, rgba(20,8,6,0.78), rgba(30,12,8,0.55) 55%, rgba(15,6,4,0.7))";
+
 export default function HomePage() {
   const { me } = useAuth();
   const [promos, setPromos] = useState<Promo[]>([]);
   const [levels, setLevels] = useState<Level[]>([]);
+  const [backgrounds, setBackgrounds] = useState<string[]>([]);
   const [bgIndex, setBgIndex] = useState(0);
   const [tab, setTab] = useState<"original" | "gourmet">("original");
 
@@ -26,12 +30,29 @@ export default function HomePage() {
       .levels()
       .then(({ data }) => setLevels(data as Level[]))
       .catch(() => setLevels([]));
+    catalogApi
+      .backgrounds()
+      .then(({ data }) => setBackgrounds(data.map((item) => item.url)))
+      .catch(() => setBackgrounds([]));
   }, []);
 
+  const backgroundCount = backgrounds.length || PAINTING_GRADIENTS.length;
+
   useEffect(() => {
-    const timer = setInterval(() => setBgIndex((value) => (value + 1) % PAINTING_GRADIENTS.length), 7000);
+    const timer = setInterval(() => setBgIndex((value) => (value + 1) % backgroundCount), 7000);
     return () => clearInterval(timer);
-  }, []);
+  }, [backgroundCount]);
+
+  const heroStyle = useMemo<CSSProperties>(() => {
+    if (backgrounds.length > 0) {
+      return {
+        backgroundImage: `${BACKGROUND_OVERLAY}, url(${backgrounds[bgIndex % backgrounds.length]})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      };
+    }
+    return { backgroundImage: PAINTING_GRADIENTS[bgIndex % PAINTING_GRADIENTS.length] };
+  }, [backgrounds, bgIndex]);
 
   const profile = me?.profile;
   const level = me?.level;
@@ -47,9 +68,9 @@ export default function HomePage() {
     <div>
       <section
         className="relative overflow-hidden text-white transition-all duration-1000"
-        style={{ backgroundImage: PAINTING_GRADIENTS[bgIndex] }}
+        style={heroStyle}
       >
-        <div className="absolute inset-0 bg-black/25" />
+        <div className="absolute inset-0 bg-black/20" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 lg:grid-cols-[1.2fr_0.8fr] lg:py-24">
           <div className="animate-fade-in">
             <span className="chip bg-white/15 text-gold-300">Гастрономическое ателье мясокомбината</span>

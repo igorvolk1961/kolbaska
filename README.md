@@ -84,6 +84,23 @@ npm run dev            # http://localhost:5173
   (генерируется `python backend/scripts/export_prompts.py`).
 - Справочники конструктора, уровни лояльности и курсы валют — `backend/app/content/gourmet.py`.
 
+## Изображения товаров
+
+Промпты лежат в `docs/product-prompts.md` и в поле `image_prompt` файла `catalog.py`. Реальные
+изображения кладутся в `images/products/`; **имя файла — это SKU товара**: `MS-001.png`, `MS-016.webp`,
+`AO-001.jpg` и т. д. (расширения `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`).
+
+Бэкенд по `/api/catalog/image/{SKU}` (и по используемому в БД `/api/catalog/placeholder/{SKU}.svg`)
+отдаёт реальный файл, если он есть, иначе — сгенерированную SVG-заглушку. Пересидирование БД и
+перезапуск не требуются для локального запуска; в Docker каталог `./images` смонтирован в `/images`.
+Подробнее — `images/products/README.md`.
+
+Фоны главной страницы кладутся в `images/backgrounds/` (любые имена и форматы `.jpg/.png/.webp/…`) и
+сменяются автоматически; список отдаёт `/api/catalog/backgrounds`. Если папка пуста — используются
+встроенные градиенты. Подробнее — `images/backgrounds/README.md`.
+
+
+
 ## Основные API
 
 | Метод | Путь | Назначение |

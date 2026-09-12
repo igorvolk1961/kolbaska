@@ -32,6 +32,61 @@ def test_placeholder_svg(client):
     assert "image/svg+xml" in response.headers["content-type"]
 
 
+def test_real_image_by_sku_overrides_placeholder(client, tmp_path, monkeypatch):
+    from app.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "images_dir", str(tmp_path))
+    (tmp_path / "MS-001.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+    (tmp_path / "MS-002.webp").write_bytes(b"RIFF....WEBP")
+    for url, expected in (
+        ("/api/catalog/image/MS-001", "image/png"),
+        ("/api/catalog/placeholder/MS-001.svg", "image/png"),
+        ("/api/catalog/image/MS-002", "image/webp"),
+    ):
+        response = client.get(url)
+        assert response.status_code == 200, url
+        assert response.headers["content-type"] == expected, url
+    missing = client.get("/api/catalog/image/MS-999")
+    assert "image/svg+xml" in missing.headers["content-type"]
+
+
+def test_image_path_traversal_is_rejected(client, tmp_path, monkeypatch):
+    from app.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "images_dir", str(tmp_path))
+    (tmp_path.parent / "secret.png").write_bytes(b"top-secret")
+    response = client.get("/api/catalog/image/..%2Fsecret")
+    assert response.status_code in (200, 404)
+    if response.status_code == 200:
+        assert "image/svg+xml" in response.headers["content-type"]
+
+
+def test_backgrounds_listing_and_serving(client, tmp_path, monkeypatch):
+    from app.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "backgrounds_dir", str(tmp_path))
+    (tmp_path / "one.jpg").write_bytes(b"\xff\xd8\xff")
+    (tmp_path / "two.webp").write_bytes(b"RIFF....WEBP")
+    (tmp_path / "Carracci-Butcher's shop.jpg").write_bytes(b"\xff\xd8\xff")
+    (tmp_path / "skip.txt").write_text("not an image")
+
+    listing = client.get("/api/catalog/backgrounds").json()
+    names = sorted(item["name"] for item in listing)
+    assert names == ["Carracci-Butcher's shop.jpg", "one.jpg", "two.webp"]
+
+    by_name = {item["name"]: item["url"] for item in listing}
+    for item in listing:
+        response = client.get(item["url"])
+        assert response.status_code == 200, item["url"]
+        assert response.headers["content-type"].startswith("image/"), item["url"]
+    assert client.get(by_name["one.jpg"]).headers["content-type"] == "image/jpeg"
+    assert client.get(by_name["two.webp"]).headers["content-type"] == "image/webp"
+
+    assert client.get("/api/catalog/backgrounds/skip.txt").status_code == 404
+    assert client.get("/api/catalog/backgrounds/no-such.jpg").status_code == 404
+    assert client.get("/api/catalog/backgrounds/..%2Fsecret").status_code == 404
+
+
 def test_currency(client):
     response = client.get("/api/catalog/currency")
     codes = {item["code"] for item in response.json()}

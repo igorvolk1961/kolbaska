@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import hashlib
+import re
+from pathlib import Path
+from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ..config import get_settings
 from ..database import get_db
 from ..models import Category, CurrencyRate, Product
 from ..schemas import CategoryOut, ProductOut
@@ -103,9 +108,75 @@ def list_currency(db: Session = Depends(get_db)) -> list[dict]:
     ]
 
 
-@router.get("/placeholder/{filename}")
-def placeholder(filename: str, db: Session = Depends(get_db)) -> Response:
-    sku = filename.replace(".svg", "")
+_SKU_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
+_IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".gif")
+_BACKGROUND_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif"}
+_MEDIA_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+    ".avif": "image/avif",
+}
+
+
+def _media_type_for(path: Path) -> str:
+    return _MEDIA_TYPES.get(path.suffix.lower(), "application/octet-stream")
+
+
+def _backgrounds_dir() -> Path:
+    return Path(get_settings().backgrounds_dir)
+
+
+@router.get("/backgrounds")
+def list_backgrounds() -> list[dict]:
+    """Список фонов главной страницы из каталога backgrounds_dir."""
+    directory = _backgrounds_dir()
+    if not directory.is_dir():
+        return []
+    files = sorted(
+        (
+            item
+            for item in directory.iterdir()
+            if item.is_file() and item.suffix.lower() in _BACKGROUND_EXTENSIONS
+        ),
+        key=lambda item: item.name,
+    )
+    return [{"name": item.name, "url": f"/api/catalog/backgrounds/{quote(item.name)}"} for item in files]
+
+
+@router.get("/backgrounds/{filename}")
+def background_image(filename: str) -> Response:
+    directory = _backgrounds_dir().resolve()
+    target = (directory / filename).resolve()
+    if (
+        target.is_file()
+        and target.suffix.lower() in _BACKGROUND_EXTENSIONS
+        and directory in target.parents
+    ):
+        return FileResponse(target, media_type=_media_type_for(target))
+    raise HTTPException(status_code=404, detail="Фон не найден")
+
+
+
+def _find_real_image(sku: str) -> Path | None:
+    """Ищет реальное изображение товара по артикулу (SKU) в каталоге images_dir."""
+    if not _SKU_RE.match(sku):
+        return None
+    images_dir = Path(get_settings().images_dir)
+    try:
+        base = images_dir.resolve()
+    except OSError:
+        return None
+    for extension in _IMAGE_EXTENSIONS:
+        candidate = base / f"{sku}{extension}"
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _placeholder_svg(db: Session, sku: str) -> Response:
     product = db.scalar(select(Product).where(Product.sku == sku))
     label = product.name if product is not None else sku
     emoji = "🥩" if sku.startswith("MS") else "🎂"
@@ -125,3 +196,22 @@ def placeholder(filename: str, db: Session = Depends(get_db)) -> Response:
   <text x="240" y="326" font-size="20" font-family="Georgia, serif" fill="#ffffff" opacity="0.8" text-anchor="middle">{sku}</text>
 </svg>"""
     return Response(content=svg, media_type="image/svg+xml")
+
+
+@router.get("/image/{filename}")
+def product_image(filename: str, db: Session = Depends(get_db)) -> Response:
+    """Реальное изображение по артикулу, иначе — сгенерированный SVG-плейсхолдер."""
+    sku = filename.rsplit(".", 1)[0]
+    real = _find_real_image(sku)
+    if real is not None:
+        return FileResponse(real, media_type=_media_type_for(real))
+    return _placeholder_svg(db, sku)
+
+
+@router.get("/placeholder/{filename}")
+def placeholder(filename: str, db: Session = Depends(get_db)) -> Response:
+    sku = filename.rsplit(".", 1)[0]
+    real = _find_real_image(sku)
+    if real is not None:
+        return FileResponse(real, media_type=_media_type_for(real))
+    return _placeholder_svg(db, sku)

@@ -1,6 +1,7 @@
 import { api } from "./client";
 import type {
   AnalyticsOverview,
+  BackgroundItem,
   Cart,
   Category,
   ClientRow,
@@ -37,6 +38,7 @@ export const catalogApi = {
   product: (id: number) => api.get<Product>(`/api/catalog/products/${id}`),
   categories: (section?: string) => api.get<Category[]>("/api/catalog/categories", { params: { section } }),
   currency: () => api.get<CurrencyRate[]>("/api/catalog/currency"),
+  backgrounds: () => api.get<BackgroundItem[]>("/api/catalog/backgrounds"),
   saveProduct: (payload: Partial<Product>, id?: number) =>
     id ? api.put<Product>(`/api/catalog/products/${id}`, payload) : api.post<Product>("/api/catalog/products", payload),
 };

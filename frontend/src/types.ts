@@ -164,6 +164,11 @@ export interface CurrencyRate {
   rate_to_base: number;
 }
 
+export interface BackgroundItem {
+  name: string;
+  url: string;
+}
+
 export interface AnalyticsOverview {
   summary: { orders: number; revenue: number; avg_check: number; items_sold: number };
   status_counts: { status: string; label: string; count: number }[];
