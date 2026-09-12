@@ -75,7 +75,7 @@ def statuses() -> list[dict]:
 
 
 # Раздача собранного SPA (используется в Docker-образе и при локальной сборке frontend).
-STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+STATIC_DIR = (Path(__file__).resolve().parent.parent / "static").resolve()
 if STATIC_DIR.is_dir():
     assets_dir = STATIC_DIR / "assets"
     if assets_dir.is_dir():
@@ -86,7 +86,11 @@ if STATIC_DIR.is_dir():
         candidate = (STATIC_DIR / full_path).resolve()
         if full_path and candidate.is_file() and STATIC_DIR in candidate.parents:
             return FileResponse(candidate)
-        return FileResponse(STATIC_DIR / "index.html")
+        # index.html не кэшируем, чтобы новые сборки подхватывались без очистки кэша браузера.
+        return FileResponse(
+            STATIC_DIR / "index.html",
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
 else:
 
     @app.get("/", include_in_schema=False)

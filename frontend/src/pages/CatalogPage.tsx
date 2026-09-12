@@ -46,10 +46,12 @@ export default function CatalogPage() {
     return list;
   }, [products, category, search]);
 
-  function updateParam(key: string, value: string) {
+  function updateParams(updates: Record<string, string>) {
     const next = new URLSearchParams(params);
-    if (value) next.set(key, value);
-    else next.delete(key);
+    for (const [key, value] of Object.entries(updates)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
     setParams(next, { replace: true });
   }
 
@@ -68,10 +70,7 @@ export default function CatalogPage() {
             <button
               key={item.code}
               type="button"
-              onClick={() => {
-                updateParam("tab", item.code);
-                updateParam("category", "");
-              }}
+              onClick={() => updateParams({ tab: item.code, category: "" })}
               className={
                 section === item.code ? "btn-primary" : "btn-ghost"
               }
@@ -92,7 +91,7 @@ export default function CatalogPage() {
         <button
           type="button"
           className={category === "" ? "btn-primary" : "btn-ghost"}
-          onClick={() => updateParam("category", "")}
+          onClick={() => updateParams({ category: "" })}
         >
           Все категории
         </button>
@@ -102,7 +101,7 @@ export default function CatalogPage() {
             type="button"
             title={item.description}
             className={category === item.slug ? "btn-primary" : "btn-ghost"}
-            onClick={() => updateParam("category", item.slug)}
+            onClick={() => updateParams({ category: item.slug })}
           >
             {item.name}
           </button>
