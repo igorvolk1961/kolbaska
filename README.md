@@ -135,6 +135,7 @@ cd frontend && npm run lint                           # eslint
 
 - [`docs/specification.md`](docs/specification.md) — спецификация прототипа и ER-диаграмма БД (Mermaid).
 - [`docs/analysis/`](docs/analysis/README.md) — артефакты системного аналитика:
+  [видение и границы](docs/analysis/vision.md),
   [требования и трассируемость](docs/analysis/requirements.md),
   [варианты использования](docs/analysis/use-cases.md),
   [процессы и последовательности](docs/analysis/processes.md),
