@@ -16,6 +16,7 @@ frontend/.vite/
 
 # Env
 .env
+demo/.env
 
 # Оригиналы изображений товаров: в git идут только оптимизированные WebP
 # (генерируются скриптом backend/scripts/optimize_images.py).
@@ -30,3 +31,14 @@ images/products/*.jpeg
 
 # Kilo / agent state
 .kilo/
+
+# Демо-тур: результаты (видео, скриншоты, кэш озвучки)
+demo/out/
+demo/.venv/
+
+# Демо-музыка: сторонние записи не коммитим, только README с атрибуцией
+demo/music/*.ogg
+demo/music/*.mp3
+demo/music/*.wav
+demo/music/*.flac
+demo/music/*.m4a

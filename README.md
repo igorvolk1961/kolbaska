@@ -126,18 +126,32 @@ npm run dev            # http://localhost:5173
 ## Тесты и проверки
 
 ```bash
-cd backend && .venv/bin/python -m pytest -q          # 19 тестов API
+cd backend && .venv/bin/python -m pytest -q          # тесты API
 cd frontend && npm run build                          # tsc --noEmit + vite build
 cd frontend && npm run lint                           # eslint
+```
+
+## Демонстрационный тур для заказчика
+
+Скрипт `demo/tour.py` автоматически проходит по всем экранам прототипа в реальном браузере,
+подсвечивает элементы, показывает подписи, озвучивает сцены через Yandex SpeechKit (TTS, мужской
+голос `filipp`) и записывает видео со скриншотами. Из скриншотов и озвучки собирается ролик со
+звуком `demo/out/video/kolbaska-tour-narrated.mp4` (`demo/narrate.py`). Подробности и настройка
+ключа TTS — `demo/README.md`.
+
+```bash
+demo/.venv/bin/python demo/tour.py       # проход по интерфейсу + озвучка
+demo/.venv/bin/python demo/narrate.py    # озвученное видео для заказчика
 ```
 
 ## Структура
 
 ```
 backend/app/          FastAPI-приложение (models, schemas, security, services, routers, content, seed)
-backend/scripts/      экспорт документации по промптам
+backend/scripts/      утилиты: экспорт промптов, сжатие изображений
 backend/tests/        pytest
 frontend/src/         React SPA (api, auth, settings, components, pages)
+demo/                 автодемонстрация: сценарий, TTS, Playwright-раннер
 docs/                 ТЗ, промпты, демо-доступы
 Dockerfile            многоступенчатая сборка (node build → python runtime)
 docker-compose.yml    сервис + том данных
