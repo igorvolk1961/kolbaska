@@ -131,6 +131,17 @@ cd frontend && npm run build                          # tsc --noEmit + vite buil
 cd frontend && npm run lint                           # eslint
 ```
 
+## Документация
+
+- [`docs/specification.md`](docs/specification.md) — спецификация прототипа и ER-диаграмма БД (Mermaid).
+- [`docs/analysis/`](docs/analysis/README.md) — артефакты системного аналитика:
+  [требования и трассируемость](docs/analysis/requirements.md),
+  [варианты использования](docs/analysis/use-cases.md),
+  [процессы и последовательности](docs/analysis/processes.md),
+  [глоссарий](docs/analysis/glossary.md).
+- [`docs/product-prompts.md`](docs/product-prompts.md) — промпты генерации изображений товаров.
+- [`docs/demo-accounts.md`](docs/demo-accounts.md) — демонстрационные учётные записи.
+
 ## Демонстрационный тур для заказчика
 
 Скрипт `demo/tour.py` автоматически проходит по всем экранам прототипа в реальном браузере,
@@ -152,7 +163,8 @@ backend/scripts/      утилиты: экспорт промптов, сжат�
 backend/tests/        pytest
 frontend/src/         React SPA (api, auth, settings, components, pages)
 demo/                 автодемонстрация: сценарий, TTS, Playwright-раннер
-docs/                 ТЗ, промпты, демо-доступы
+docs/                 ТЗ, спецификация (`specification.md` + ERD), промпты, демо-доступы
+docs/analysis/        артефакты системного аналитика: требования, use cases, процессы, глоссарий
 Dockerfile            многоступенчатая сборка (node build → python runtime)
 docker-compose.yml    сервис + том данных
 ```
