@@ -26,7 +26,10 @@ def test_categories_filter(client):
     assert len(response.json()) == 16
 
 
-def test_placeholder_svg(client):
+def test_placeholder_svg(client, tmp_path, monkeypatch):
+    from app.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "images_dir", str(tmp_path / "empty"))
     response = client.get("/api/catalog/placeholder/MS-001.svg")
     assert response.status_code == 200
     assert "image/svg+xml" in response.headers["content-type"]
@@ -37,11 +40,14 @@ def test_real_image_by_sku_overrides_placeholder(client, tmp_path, monkeypatch):
 
     monkeypatch.setattr(get_settings(), "images_dir", str(tmp_path))
     (tmp_path / "MS-001.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+    (tmp_path / "MS-001.webp").write_bytes(b"RIFF....WEBP")
     (tmp_path / "MS-002.webp").write_bytes(b"RIFF....WEBP")
+    (tmp_path / "MS-003.png").write_bytes(b"\x89PNG\r\n\x1a\n")
     for url, expected in (
-        ("/api/catalog/image/MS-001", "image/png"),
-        ("/api/catalog/placeholder/MS-001.svg", "image/png"),
+        ("/api/catalog/image/MS-001", "image/webp"),
+        ("/api/catalog/placeholder/MS-001.svg", "image/webp"),
         ("/api/catalog/image/MS-002", "image/webp"),
+        ("/api/catalog/image/MS-003", "image/png"),
     ):
         response = client.get(url)
         assert response.status_code == 200, url

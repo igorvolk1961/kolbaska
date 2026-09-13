@@ -17,6 +17,12 @@ frontend/.vite/
 # Env
 .env
 
+# Оригиналы изображений товаров: в git идут только оптимизированные WebP
+# (генерируются скриптом backend/scripts/optimize_images.py).
+images/products/*.png
+images/products/*.jpg
+images/products/*.jpeg
+
 # Editors / OS
 .idea/
 .vscode/

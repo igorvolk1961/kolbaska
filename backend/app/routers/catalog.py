@@ -109,7 +109,7 @@ def list_currency(db: Session = Depends(get_db)) -> list[dict]:
 
 
 _SKU_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
-_IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".gif")
+_IMAGE_EXTENSIONS = (".webp", ".png", ".jpg", ".jpeg", ".gif")
 _BACKGROUND_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif"}
 _MEDIA_TYPES = {
     ".png": "image/png",

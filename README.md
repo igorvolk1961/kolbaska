@@ -95,6 +95,10 @@ npm run dev            # http://localhost:5173
 перезапуск не требуются для локального запуска; в Docker каталог `./images` смонтирован в `/images`.
 Подробнее — `images/products/README.md`.
 
+Изображения лучше класть сжатыми: бэкенд предпочитает WebP, а оригиналы (png/jpg) в git не попадают.
+Сжать исходники в лёгкие WebP: `pip install -r backend/requirements-dev.txt` и
+`python backend/scripts/optimize_images.py`.
+
 Фоны главной страницы кладутся в `images/backgrounds/` (любые имена и форматы `.jpg/.png/.webp/…`) и
 сменяются автоматически; список отдаёт `/api/catalog/backgrounds`. Если папка пуста — используются
 встроенные градиенты. Подробнее — `images/backgrounds/README.md`.
